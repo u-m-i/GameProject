@@ -1,8 +1,7 @@
 # Code 
-
-*.js text
-*.html text
-*.css text
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
 
 # Binaries
 *.png binary
