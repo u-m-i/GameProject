@@ -6,9 +6,12 @@ const CHEST_LENGTH = (SPINE_LENGTH / 2) + 2;
 const HAND_LENGTH = 12
 const LEG_LENGTH = 14;
 
+const MOVEMENT_SUM = 3;
+
 let delta = 10
 let offset = 18;
 let maximumHeight;
+let rightLimit, leftLimit;
 
 let gameChar_x;
 let gameChar_y;
@@ -19,6 +22,27 @@ let canyon;
 // Booleans
 let isFalling = false, isJumping = false, isPlummeting = false;
 let isLeft = false, isRight = false;
+// Array with all the moveable scene props
+let props = [];
+
+function propMovement(direction)
+{
+    for(let i = 0; i < props.length; ++i)
+    {
+        switch(direction)
+        {
+
+            case "up":
+            case "left": 
+                props[i].x += MOVEMENT_SUM
+                break;
+
+            case "right":
+                props[i].x -= MOVEMENT_SUM
+        }
+
+    }
+}
 
 function setup()
 {
@@ -26,7 +50,11 @@ function setup()
 	floorPos_y = height * 3/4;
 	gameChar_x = width/2;
 	gameChar_y = floorPos_y;
-    maximumHeight = floorPos_y - 60;
+    maximumHeight = floorPos_y - 56;
+
+    rightLimit = width - 200;
+
+    leftLimit = width - rightLimit;
 
     coin = 
         {
@@ -44,6 +72,7 @@ function setup()
             hasEntered : false
         };
 
+    props.push(coin, canyon);
 }
 
 function draw()
@@ -209,7 +238,6 @@ function draw()
 	}
 	else if(isFalling || isJumping || canyon.hasEntered)
 	{
-		// add your jumping facing forwards code
         //Spine
         stroke(0);
         line(gameChar_x, gameChar_y - offset,  gameChar_x, (gameChar_y - offset) - SPINE_LENGTH); 
@@ -235,8 +263,6 @@ function draw()
         fill(134);
         noStroke();
         ellipse(gameChar_x, gameChar_y + 6, 40,10);
-
-
 	}
 	else // Idle
 	{
@@ -267,23 +293,36 @@ function draw()
 	}
 
 	///////////INTERACTION CODE//////////
-	//Put conditional statements to move the game character below here
-    //
+
 
     if(isLeft && gameChar_x >= 0 )
     {
-        gameChar_x--;
+        gameChar_x-= 2;
+
+        if(gameChar_x >= (leftLimit + 20))
+        {
+            // To all the props in the scene to move
+            propMovement("left");
+        }
+
     }
 
     if(isRight && gameChar_x <= width)
     {
-        gameChar_x++;
+        gameChar_x+= 2;
+
+        if(gameChar_x >= (rightLimit - 20))
+        {
+            // To all the props in the scene to move
+            propMovement("right");
+        }
+
     }
 
-    // Start adding to the y, so it simulates gravity
+    // Increase Y to simulate so it simulates gravity
     if(isFalling && (gameChar_y < floorPos_y || canyon.hasEntered))
     {
-        gameChar_y += 6;
+        gameChar_y += 1.2;
     }
     else if(isFalling && gameChar_y == floorPos_y)
     {
@@ -293,7 +332,7 @@ function draw()
 
     if(isJumping && gameChar_y > maximumHeight)
     {
-        gameChar_y -= 10; // 10 is the force of the jump
+        gameChar_y -= 4; // 8 is the force of the jump
     }
     else if(gameChar_y == maximumHeight && isJumping)
     {
