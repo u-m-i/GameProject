@@ -1,29 +1,26 @@
-// Constans for character structure
+//import {SPINE_LENGTH, HEAD_DIAMETER, CHEST_LENGTH, HAND_LENGTH, LEG_LENGTH, MOVEMENT_SUM} from './configuration.js';
 
-const SPINE_LENGTH = 34;
-const HEAD_DIAMETER = 18;
-const CHEST_LENGTH = (SPINE_LENGTH / 2) + 2;
-const HAND_LENGTH = 12
-const LEG_LENGTH = 14;
+// States
+let isFalling = false, isJumping = false, isPlummeting = false;
 
-const MOVEMENT_SUM = 3;
+// Direction 
+let isLeft = false, isRight = false;
+
+// Array with all the moveable scene props
+let props = [];
 
 let delta = 10
 let offset = 18;
 let maximumHeight;
 let rightLimit, leftLimit;
 
-let gameChar_x;
-let gameChar_y;
-let floorPos_y;
 let coin;
 let canyon;
 
-// Booleans
-let isFalling = false, isJumping = false, isPlummeting = false;
-let isLeft = false, isRight = false;
-// Array with all the moveable scene props
-let props = [];
+let gameChar_x;
+let gameChar_y;
+let floorPos_y;
+
 
 function propMovement(direction)
 {
@@ -47,7 +44,9 @@ function propMovement(direction)
 function setup()
 {
 	createCanvas(1024, 576);
+
 	floorPos_y = height * 3/4;
+
 	gameChar_x = width/2;
 	gameChar_y = floorPos_y;
     maximumHeight = floorPos_y - 56;
@@ -73,20 +72,18 @@ function setup()
         };
 
     props.push(coin, canyon);
+
 }
 
 function draw()
 {
 
-	///////////DRAWING CODE//////////
-
 	background(100,155,255); //fill the sky blue
-    //console.log(gameChar_x);
 
 
 	noStroke();
 	fill(0,155,0);
-	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
+	rect(0, floorPos_y, width, height - floorPos_y);
 
     if(dist(gameChar_x, gameChar_y, coin.x, coin.y) < 26.5)
     {
@@ -106,21 +103,32 @@ function draw()
         ellipse(coin.x, coin.y + 20, 40, 3);
     }
 
-	//draw the canyon
+    // CANYON
+
     fill(100, 155, 255);
     rect(canyon.x, floorPos_y, canyon.size, 144); 
 
-    console.log(dist(gameChar_x, gameChar_y, (canyon.x + canyon.size), canyon.y));
     fill(0);
     ellipse((canyon.x + canyon.size), floorPos_y, 10, 10);
 
-    if(dist(gameChar_x, gameChar_y, canyon.x, canyon.y) < 8 || dist(gameChar_x, gameChar_y, (canyon.x + canyon.size), canyon.y) < 5)
+    //if(dist(gameChar_x, gameChar_y, canyon.x, canyon.y) < 8 || dist(gameChar_x, gameChar_y, (canyon.x + canyon.size), canyon.y) < 5)
+    //{
+    //    isFalling = true;
+    //    canyon.hasEntered = true;
+    //}
+
+    console.log(dist(gameChar_x, gameChar_y, (canyon.x + canyon.size), canyon.y));
+
+    // If the character has passed certain coordinates, then falls into the void
+    if((gameChar_x <= canyon.x  || gameChar_x >= canyon.x) && (gameChar_y <= canyon.y && gameChar_y <= floorPos_y))
     {
-        isFalling = true;
+        isFalling = 
         canyon.hasEntered = true;
     }
 
-	//the game character
+
+	// CHARACTER 
+
 	if(isLeft && (isFalling || isJumping))
 	{
 		// add your jumping-left code
@@ -145,6 +153,7 @@ function draw()
 
         //Left arm
         line(gameChar_x, (gameChar_y - offset) - CHEST_LENGTH,  gameChar_x - HAND_LENGTH, (gameChar_y - offset) - CHEST_LENGTH - delta); 
+
         //Shadow
         fill(134);
         noStroke();
@@ -181,7 +190,7 @@ function draw()
         ellipse(gameChar_x, gameChar_y + 6, 40,10);
 
 	}
-	else if(isLeft && !isRight)
+	else if(isLeft)
 	{
         console.log(`isLeft : ${isLeft} isRight: ${isRight}`);
 
@@ -209,7 +218,7 @@ function draw()
         ellipse(gameChar_x, gameChar_y + 6, 40,10);
 
 	}
-	else if(isRight && !isLeft)
+	else if(isRight)
 	{
         //Spine
         stroke(0);
@@ -344,16 +353,13 @@ function draw()
 
 function keyPressed()
 {
-	// if statements to control the animation of the character when
-	// keys are pressed.
-    //
 
-    if(keyCode == 39)
+    if(keyCode == RIGHT_ARROW_KEY_CODE)
     {
         isRight = true;
     }
 
-    if(keyCode == 37)
+    if(keyCode == LEFT_ARROW_KEY_CODE)
     {
         isLeft = true;
     }
@@ -366,13 +372,9 @@ function keyPressed()
 
 function keyReleased()
 {
-    if(isLeft)
-    {
-        isLeft = false;
-    }
-
-    if(isRight)
-    {
+    if(isRight && keyCode == RIGHT_ARROW_KEY_CODE)
         isRight = false;
-    }
+
+    if(isLeft && keyCode == LEFT_ARROW_KEY_CODE)
+        isLeft = false;
 }
