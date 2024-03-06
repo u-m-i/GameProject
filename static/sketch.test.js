@@ -16,6 +16,8 @@ function setup()
 
    character = new Character(230,400, 2);
 
+   //console.log(character);
+
 	background(100,155,255); //fill the sky blue
 }
 
@@ -25,6 +27,14 @@ function draw()
    clear();
 
 	background(100,155,255);
+
+
+   // Ground
+   stroke(30);
+	strokeWeight(3);
+
+	fill(0,155,83);
+	rect(0, (height * 3/4), width, height - (height * 3/4));
 
    character.draw();
 }
