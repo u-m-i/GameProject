@@ -1,7 +1,9 @@
-import {BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD} from './configuration.js';
+import {DOWNWARD,BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD} from './configuration.js';
 
 let directionMap = new Map();
 let character = {};
+let gravity = {};
+let floor = {};
 
 
 // Concrete methods
@@ -14,9 +16,25 @@ function setup()
    directionMap.set(RIGHT_KEY, createVector(...FORWARD));
    directionMap.set(JUMP_KEY, createVector(...UPWARD));
 
-   character = new Character(230,400, 2);
+   character = new Character(230,400, 8, 2);
 
-   //console.log(character);
+   let downward = createVector(...DOWNWARD);
+
+   floor = (height * 3/4);
+
+   gravity = p5.Vector.div(downward, 12);
+
+//   object = new Character(200, 90, 8, 2);
+
+//   const iterator = object.addContinuousForce(createVector(...UPWARD));
+//
+//   for(let i = 0; i < 16; ++i)
+//   {
+//      let result = iterator.next().value;
+//      
+//      console.log(`Iteration ${i} with the value ${result}`);
+//   }
+
 
 	background(100,155,255); //fill the sky blue
 }
@@ -34,9 +52,21 @@ function draw()
 	strokeWeight(3);
 
 	fill(0,155,83);
-	rect(0, (height * 3/4), width, height - (height * 3/4));
+	rect(0, floor, width, height - floor);
 
    character.draw();
+
+   console.log(character.transform.y > floor);
+
+   if(character.transform.y <= floor)
+   {
+      console.log(`transform.y ${character.transform.y}, floor ${floor}`);
+      character.addForce(gravity);
+   }
+   else
+   {
+      character.velocity.y = 0;
+   }
 }
 
 
@@ -46,9 +76,7 @@ function keyPressed()
       return;
 
    if(directionMap.get(key) !== undefined)
-   {
-      character.addForce(directionMap.get(key));
-   }
+      character.setDirection(directionMap.get(key));
 }
 
 function keyReleased()
@@ -57,9 +85,7 @@ function keyReleased()
       return;
 
    if(directionMap.get(key) !== undefined)
-   {
-      character.subForce(directionMap.get(key));
-   }
+      character.unsetDirection(directionMap.get(key));
 }
 
 // Add the p5 engine
