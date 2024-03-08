@@ -68,17 +68,28 @@ class Object
       // {p5.Vector}
       let buffer = p5.Vector.mult(vector, ratio);
 
-      while(abs(this.velocity.x) < this.multiplier && abs(this.velocity.y) < this.multiplier)
+      while(abs(this.velocity.y) < this.multiplier)
       {
          this.velocity.add(buffer);
          yield this.velocity;
       }
 
-      while(abs(this.velocity.x) > 0 || abs(this.velocity.y) > 0)
+      //while(abs(this.velocity.x) < this.multiplier && abs(this.velocity.y) < this.multiplier)
+      //{
+      //   this.velocity.add(buffer);
+      //   yield this.velocity;
+      //}
+
+      while(abs(this.velocity.y) > 0)
       {
          this.velocity.sub(buffer);
          yield this.velocity;
       }
+      //while(abs(this.velocity.x) > 0 || abs(this.velocity.y) > 0)
+      //{
+      //   this.velocity.sub(buffer);
+      //   yield this.velocity;
+      //}
    }
 }
 
@@ -303,4 +314,27 @@ class Character extends Object
 }
 
 
-export {Character,LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
+class Coin extends Object
+{
+   state;
+
+   draw()
+   {
+
+      if(this.state == "picked")
+         return;
+
+      stroke(0);
+      fill(250, 255, 80);
+      circle(this.transform.x, this.transform.y, 30);
+
+      noStroke();
+
+      fill(100, 100, 100, 140);
+      ellipse(this.transform.x, this.transform.y + 20, 40, 3);
+
+   }
+}
+
+
+export {Coin, Character, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};

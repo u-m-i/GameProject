@@ -1,9 +1,10 @@
-import {DOWNWARD,BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD} from './configuration.js';
+import {DOWNWARD,BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD, Coin} from './configuration.js';
 
 let directionMap = new Map();
 let character = {};
 let gravity = {};
 let floor = {};
+let coin;
 
 
 // Concrete methods
@@ -20,9 +21,9 @@ function setup()
 
    let downward = createVector(...DOWNWARD);
 
-   floor = (height * 3/4);
+   floor = (height * 7/8);
 
-   gravity = p5.Vector.div(downward, 12);
+   gravity = p5.Vector.div(downward, 14);
 
 //   object = new Character(200, 90, 8, 2);
 
@@ -35,6 +36,7 @@ function setup()
 //      console.log(`Iteration ${i} with the value ${result}`);
 //   }
 
+   coin = new Coin(450, floor - 10, 2, 2);
 
 	background(100,155,255); //fill the sky blue
 }
@@ -43,24 +45,37 @@ function setup()
 function draw()
 {
    clear();
-
-	background(100,155,255);
+   background(100,155,255);
 
 
    // Ground
    stroke(30);
 	strokeWeight(3);
 
+
 	fill(0,155,83);
 	rect(0, floor, width, height - floor);
 
+   coin.draw();
+
+//   stroke(0);
+//   fill(250, 255, 80);
+//   circle(coin.x, coin.y, 30);
+//
+//   noStroke();
+//
+//   fill(100, 100, 100, 140);
+//   ellipse(coin.x, coin.y + 20, 40, 3);
+
    character.draw();
 
-   console.log(character.transform.y > floor);
+   console.log(`Is the character grounded? ${character.transform.y > floor}`);
+   console.log(`velocity->${character.velocity.x},${character.velocity.y}`);
+
 
    if(character.transform.y <= floor)
    {
-      console.log(`transform.y ${character.transform.y}, floor ${floor}`);
+     // console.log(`transform.y ${character.transform.y}, floor ${floor}`);
       character.addForce(gravity);
    }
    else
