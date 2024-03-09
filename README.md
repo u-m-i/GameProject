@@ -12,6 +12,14 @@ Using generators to simulate gravity and the continous agregation of force
 Using modules to divide the code
 Add compression to the files
 
+### Todo
+
+- Code collission with coins
+- Code collision with platforms
+- Code pitfalls
+
+- Create a creator function to instatiate multiple props depending in a number given
+
 ## Results
 
 <img src="./docs/generator_imp.jpg">

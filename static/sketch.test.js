@@ -1,10 +1,10 @@
-import {DOWNWARD,BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD, Coin} from './configuration.js';
+import {Platform, DOWNWARD,BACKWARD, Character, FORWARD, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD, Coin} from './configuration.js';
 
 let directionMap = new Map();
 let character = {};
 let gravity = {};
 let floor = {};
-let coin;
+let coin, platform;
 
 
 // Concrete methods
@@ -17,13 +17,14 @@ function setup()
    directionMap.set(RIGHT_KEY, createVector(...FORWARD));
    directionMap.set(JUMP_KEY, createVector(...UPWARD));
 
-   character = new Character(230,400, 8, 2);
 
    let downward = createVector(...DOWNWARD);
+
 
    floor = (height * 7/8);
 
    gravity = p5.Vector.div(downward, 14);
+
 
 //   object = new Character(200, 90, 8, 2);
 
@@ -36,7 +37,11 @@ function setup()
 //      console.log(`Iteration ${i} with the value ${result}`);
 //   }
 
+   character = new Character(250,400, 8, 5);
+
    coin = new Coin(450, floor - 10, 2, 2);
+
+   platform = new Platform(480, floor - 20, 2, 2);
 
 	background(100,155,255); //fill the sky blue
 }
@@ -52,34 +57,41 @@ function draw()
    stroke(30);
 	strokeWeight(3);
 
-
 	fill(0,155,83);
 	rect(0, floor, width, height - floor);
 
    coin.draw();
-
-//   stroke(0);
-//   fill(250, 255, 80);
-//   circle(coin.x, coin.y, 30);
-//
-//   noStroke();
-//
-//   fill(100, 100, 100, 140);
-//   ellipse(coin.x, coin.y + 20, 40, 3);
+   platform.draw();
 
    character.draw();
 
-   console.log(`Is the character grounded? ${character.transform.y > floor}`);
-   console.log(`velocity->${character.velocity.x},${character.velocity.y}`);
+   //console.log(`dist(character.transform, coin.transform) => ${p5.Vector.dist(character.transform, coin.transform)}`);
 
+   if(p5.Vector.dist(character.transform, coin.transform) < 22)
+      coin.state = "picked";
 
-   if(character.transform.y <= floor)
+   
+   //console.log(`${character.transform.y} -> ${platform.transform.y}`);
+
+   if(character.transform.y < platform.transform.y && character.transform.x >= platform.transform.x)
    {
-     // console.log(`transform.y ${character.transform.y}, floor ${floor}`);
+      console.log("condition one");
+      character.addForce(gravity);
+   }
+   else if(character.transform.y >= platform.transform.y && character.transform.x >= platform.transform.x)
+   {
+      console.log("condition two");
+      character.velocity.x = 0;
+   }
+   else if(character.transform.y < floor)
+   {
+      // console.log(`transform.y ${character.transform.y}, floor ${floor}`);
+      console.log("condition three");
       character.addForce(gravity);
    }
    else
    {
+      console.log("condition four");
       character.velocity.y = 0;
    }
 }

@@ -336,5 +336,15 @@ class Coin extends Object
    }
 }
 
+class Platform extends Object
+{
+   draw()
+   {
+      stroke(0);
+      fill(120,45,80);
+      rect(this.transform.x, this.transform.y, 100, 22, 20, 20, 20, 20);
+   }
+}
 
-export {Coin, Character, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
+
+export {Platform, Coin, Character, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
