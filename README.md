@@ -18,7 +18,7 @@ Add compression to the files
 - Code collision with platforms
   - Collision underneath (done)
   - Use the limits with the gravity (done)
-- Code collission with coins
+- Code collission with coins (done)
 - Code pitfalls
 
 - Create a creator function to instatiate multiple props depending in a number given

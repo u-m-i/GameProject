@@ -324,7 +324,12 @@ class Character extends Object
 
 class Coin extends Object
 {
-   state;
+// {String}
+   state; 
+// {Number}
+   diameter = 30;
+// {Number}
+   threshold = 2;
 
    draw()
    {
@@ -334,13 +339,22 @@ class Coin extends Object
 
       stroke(0);
       fill(250, 255, 80);
-      circle(this.transform.x, this.transform.y, 30);
+      circle(this.transform.x, this.transform.y, this.diameter);
 
       noStroke();
 
       fill(100, 100, 100, 140);
       ellipse(this.transform.x, this.transform.y + 20, 40, 3);
+   }
 
+   getLimits(transform)
+   {
+      console.log(`p5.Vector.dist(transform,hitbox) -> ${p5.Vector.dist(transform,this.transform)}`);
+
+      if(p5.Vector.dist(transform, this.transform) + this.diameter <= this.threshold || p5.Vector.dist(transform, this.transform) - this.diameter <= this.threshold)
+      {
+         this.state = "picked";
+      }
    }
 }
 

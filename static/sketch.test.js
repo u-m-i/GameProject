@@ -4,7 +4,7 @@ let directionMap = new Map();
 let character = {};
 let gravity = {};
 let floor = {};
-let coin, platform;
+let coin, platform, lastcoin;
 let collissionObjects = [];
 
 
@@ -25,6 +25,8 @@ function setup()
    character = new Character(250,400, 8, 4);
 
    coin = new Coin(450, floor - 10, 2, 2);
+
+   lastcoin = new Coin(807, floor - 10, 2, 2);
 
    platform = new Platform(480, floor - 92, 2, 2);
 
@@ -50,11 +52,14 @@ function draw()
 	fill(0,155,83);
 	rect(0, floor, width, height - floor);
 
-   //coin.draw();
+   coin.draw();
+   lastcoin.draw();
    platform.draw();
    character.draw();
    
    platform.getLimits(character.transform, character.crown());
+   coin.getLimits(character.transform);
+   lastcoin.getLimits(character.transform);
 
 
    if(character.transform.y < limits.min)
