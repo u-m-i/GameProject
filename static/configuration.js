@@ -20,6 +20,20 @@ const BACKWARD = [-1,0];
 const UPWARD =  [0,-1];
 const DOWNWARD =  [0,1];
 
+
+const limits =
+{
+   setMax : function(max)
+   {
+      this.max = max === 0 ? 16 : max;
+   },
+
+   setMin : function(min)
+   {
+      this.min = min === 0 ? (height * 7/8) : min;
+   }
+};
+
 class Object
 {
    transform; // {p5.Vector}
@@ -48,10 +62,6 @@ class Object
       let amplification  = p5.Vector.mult(vector, this.multiplier);
 
       this.velocity.add(amplification);
-
-      //console.log(this.velocity);
-
-      //console.log(`The velocity of the character -> ${this.velocity}`);
    }
 
    subForce(vector)
@@ -63,33 +73,24 @@ class Object
 
    *addContinuousForce(vector)
    {
-      let ratio = this.multiplier / this.acceleration;
+      let speed = 16 / this.acceleration;
 
       // {p5.Vector}
-      let buffer = p5.Vector.mult(vector, ratio);
+      let force = p5.Vector.mult(vector, speed);
 
-      while(abs(this.velocity.y) < this.multiplier)
+      console.log(limits.max);
+
+      while(abs(this.velocity.y) < limits.max)
       {
-         this.velocity.add(buffer);
+         this.velocity.add(force);
          yield this.velocity;
       }
-
-      //while(abs(this.velocity.x) < this.multiplier && abs(this.velocity.y) < this.multiplier)
-      //{
-      //   this.velocity.add(buffer);
-      //   yield this.velocity;
-      //}
 
       while(abs(this.velocity.y) > 0)
       {
-         this.velocity.sub(buffer);
+         this.velocity.sub(force);
          yield this.velocity;
       }
-      //while(abs(this.velocity.x) > 0 || abs(this.velocity.y) > 0)
-      //{
-      //   this.velocity.sub(buffer);
-      //   yield this.velocity;
-      //}
    }
 }
 
@@ -97,6 +98,11 @@ class Character extends Object
 {
 
    state; // {String}
+
+   crown = function() 
+   {
+      return this.transform.y - SPINE_LENGTH - HEAD_DIAMETER * 2 + 4 ;
+   }
 
    constructor(x,y, acceleration, velocityMultiplier)
    {
@@ -106,7 +112,7 @@ class Character extends Object
    }
 
 
-   left = function()
+   left()
    {
         //Spine
       stroke(0);
@@ -244,12 +250,14 @@ class Character extends Object
 
    setDirection(vector)
    {
+      console.log(this.velocity);
+
       if(vector.y < 0 && (this.state == "jumping" || this.state == "falling"))
          return;
 
       if(vector.y < 0)
       {
-         this.coroutine = this.addContinuousForce(vector, this.acceleration);
+         this.coroutine = this.addContinuousForce(vector);
          this.state = "jumping";
          return;
       }
@@ -259,7 +267,7 @@ class Character extends Object
 
    unsetDirection(vector)
    {
-      if(vector.y < 0 && (this.state == "jumping" || this.state == "falling"))
+      if(vector.y < 0)
          return;
 
       this.subForce(vector);
@@ -281,7 +289,6 @@ class Character extends Object
       {
          let result = this.coroutine.next().value;
 
-         console.log(result);
 
          if(!result)
          {
@@ -289,8 +296,9 @@ class Character extends Object
          }
       }
 
-
       this.transform.add(this.velocity); // Adds force to the body
+
+      point(this.transform.x, this.transform.y);
 
       if(this.velocity.x < 0)
       {
@@ -338,13 +346,57 @@ class Coin extends Object
 
 class Platform extends Object
 {
+   width = 100;
+   height = 22;
+
    draw()
    {
       stroke(0);
       fill(120,45,80);
-      rect(this.transform.x, this.transform.y, 100, 22, 20, 20, 20, 20);
+      rect(this.transform.x, this.transform.y, this.width, this.height, 20, 20, 20, 20);
+   }
+
+   getLimits(position, top)
+   {
+      if(position.x >= this.transform.x && position.x <= (this.transform.x + 100))
+      {
+         fill(255,0,0,100);
+         rect(this.transform.x, this.transform.y + 22,  this.width, (height * (7/8)) - this.transform.y - 20);
+
+         if(position.y < (this.transform.y + this.height)) // going down 
+         {
+            console.log("Do apply gravity");
+            limits.setMin(this.transform.y);
+         }
+
+         if(position.y >= this.transform.y && top < this.transform.y)
+         {
+            console.log("Do not apply gravity");
+         }
+
+         if(top > this.transform.y + this.height)
+         {
+            limits.setMax(top - (this.transform.y + this.height));
+
+            stroke(2);
+            fill(0);
+            line(position.x, top, this.transform.x, (this.transform.y + this.height));
+         }
+
+         return;
+      }
+         
+
+      limits.setMax(0);
+      limits.setMin(0);
+
+      if(top < (this.transform.y + this.height) && top > this.transform.y)
+      {
+         fill(0,255,0,100);
+         rect(this.transform.x - 70, this.transform.y, 70, this.height);
+      }
    }
 }
 
 
-export {Platform, Coin, Character, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
+export {Platform, Coin, Character, limits, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};

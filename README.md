@@ -14,8 +14,10 @@ Add compression to the files
 
 ### Todo
 
-- Code collission with coins
+- Increase jump distance (done)
 - Code collision with platforms
+  - Collision underneath (done)
+- Code collission with coins
 - Code pitfalls
 
 - Create a creator function to instatiate multiple props depending in a number given
