@@ -21,16 +21,28 @@ const UPWARD =  [0,-1];
 const DOWNWARD =  [0,1];
 
 
-const limits =
+let limits =
 {
+   setDefault: function(min, max)
+   {
+      this.minDefault = min;
+      this.maxDefault = max;
+   },
+
    setMax : function(max)
    {
-      this.max = max === 0 ? 16 : max;
+      this.max = max === 0 ? maxDefault : max;
    },
 
    setMin : function(min)
    {
-      this.min = min === 0 ? (height * 7/8) : min;
+      this.min = min === 0 ? this.minDefault : min;
+   },
+
+   reset: function()
+   {
+      this.min = this.minDefault;
+      this.max = this.maxDefault;
    }
 };
 
@@ -38,7 +50,6 @@ class Object
 {
    transform; // {p5.Vector}
    velocity; // {p5.Vector}
-
    multiplier; // {Number}
    acceleration; // {Number}
 
@@ -78,8 +89,6 @@ class Object
       // {p5.Vector}
       let force = p5.Vector.mult(vector, speed);
 
-      console.log(limits.max);
-
       while(abs(this.velocity.y) < limits.max)
       {
          this.velocity.add(force);
@@ -97,12 +106,12 @@ class Object
 class Character extends Object
 {
 
-   state; // {String}
+// {String}
+   state;
 
-   crown = function() 
-   {
-      return this.transform.y - SPINE_LENGTH - HEAD_DIAMETER * 2 + 4 ;
-   }
+// {p5.Sound}
+   jumpingsound;
+
 
    constructor(x,y, acceleration, velocityMultiplier)
    {
@@ -111,6 +120,10 @@ class Character extends Object
       this.state = "idle";
    }
 
+   crown = function() 
+   {
+      return this.transform.y - SPINE_LENGTH - HEAD_DIAMETER * 2 + 4 ;
+   }
 
    left()
    {
@@ -248,6 +261,11 @@ class Character extends Object
       ellipse(this.transform.x, this.transform.y + 6, 40,10);
    }
 
+   playSound()
+   {
+      this[this.state+"sound"]?.play();
+   }
+
    setDirection(vector)
    {
       console.log(this.velocity);
@@ -259,6 +277,7 @@ class Character extends Object
       {
          this.coroutine = this.addContinuousForce(vector);
          this.state = "jumping";
+         this.playSound();
          return;
       }
 
@@ -349,7 +368,6 @@ class Coin extends Object
 
    getLimits(transform)
    {
-      //console.log(`p5.Vector.dist(transform,hitbox) -> ${p5.Vector.dist(transform,this.transform)}`);
 
       if(p5.Vector.dist(transform, this.transform) + this.diameter <= this.threshold || p5.Vector.dist(transform, this.transform) - this.diameter <= this.threshold)
       {
@@ -374,6 +392,8 @@ class Platform extends Object
    {
       if(position.x >= this.transform.x && position.x <= (this.transform.x + 100))
       {
+         registerColl(this);
+
          fill(255,0,0,100);
          rect(this.transform.x, this.transform.y + 22,  this.width, (height * (7/8)) - this.transform.y - 20);
 
@@ -402,10 +422,8 @@ class Platform extends Object
 
          return;
       }
-      // Reset the limits
 
-      limits.setMax(0);
-      limits.setMin(0);
+      unregisterColl(this);
 
       if(top < (this.transform.y + this.height) && top > this.transform.y)
       {
@@ -415,5 +433,71 @@ class Platform extends Object
    }
 }
 
+class Enemy extends Object
+{
+// {Number}
+   width =  50;
+// {Number}
+   height = 50;
 
-export {Platform, Coin, Character, limits, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
+   draw()
+   {
+      push();
+
+      stroke(10);
+      strokeWeight(3);
+
+      fill(184, 8, 0);
+      rectMode(CENTER);
+      rect(this.transform.x, this.transform.y - this.height / 2, this.width, this.height);
+
+      triangle(this.transform.x - this.width / 2, this.transform.y - this.height , this.transform.x - (this.width / 2) + 10, this.transform.y - this.height - 10, this.transform.x - (this.width / 2) + 20, this.transform.y - this.height );
+
+      pop();
+   }
+
+
+   getLimits(transform)
+   {
+      if(transform.x >= this.transform.x - (this.width / 2) 
+         && transform.x < this.transform.x + (this.width / 2))
+      {
+         registerColl(this);
+
+         if(transform.y < this.transform.y - this.height)
+         {
+            //console.log("Collision with an enemy -1 live!");
+            limits.setMin(this.transform.y - this.height);
+            //console.log(`The limit.min -> ${limits.min}`);
+         }
+
+         return;
+      }
+
+      unregisterColl(this);
+   }
+}
+
+let lastColl;
+
+function unregisterColl( objct )
+{
+   if(!lastColl)
+      return;
+
+   if(lastColl === objct)
+   {
+      limits.reset();
+   }
+}
+
+function registerColl( objct )
+{
+   if(lastColl === objct)
+      return;
+
+   lastColl = objct;
+}
+
+
+export {Platform, Coin, Character, Enemy, limits, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};

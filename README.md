@@ -15,13 +15,14 @@ Add compression to the files
 ### Todo
 
 - Increase jump distance (done)
-- Code collision with platforms
+- Code collision with platforms (done)
   - Collision underneath (done)
   - Use the limits with the gravity (done)
 - Code collission with coins (done)
 - Code pitfalls (done)
 - Code enemies
 - Code game logic - Rules, gameover, hearts -
+- Add sound effects
 
 - Create a creator function to instatiate multiple props depending in a number given
 
