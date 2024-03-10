@@ -349,7 +349,7 @@ class Coin extends Object
 
    getLimits(transform)
    {
-      console.log(`p5.Vector.dist(transform,hitbox) -> ${p5.Vector.dist(transform,this.transform)}`);
+      //console.log(`p5.Vector.dist(transform,hitbox) -> ${p5.Vector.dist(transform,this.transform)}`);
 
       if(p5.Vector.dist(transform, this.transform) + this.diameter <= this.threshold || p5.Vector.dist(transform, this.transform) - this.diameter <= this.threshold)
       {

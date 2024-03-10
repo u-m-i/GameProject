@@ -19,7 +19,9 @@ Add compression to the files
   - Collision underneath (done)
   - Use the limits with the gravity (done)
 - Code collission with coins (done)
-- Code pitfalls
+- Code pitfalls (done)
+- Code enemies
+- Code game logic - Rules, gameover, hearts -
 
 - Create a creator function to instatiate multiple props depending in a number given
 

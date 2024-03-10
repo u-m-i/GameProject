@@ -45,23 +45,48 @@ function draw()
    background(100,155,255);
 
 
-   // Ground
+   // Draw the world
    stroke(30);
 	strokeWeight(3);
 
 	fill(0,155,83);
 	rect(0, floor, width, height - floor);
 
+   // test
+
+   noStroke();
+   fill(100,155,255);
+   rect(820, floor, 140, height - floor);
+
+	fill(0,155,83);
+   stroke(30);
+   //fill(40,40,200);
+	strokeWeight(3);
+   rect(940,floor, 60, height - floor, 100, 0, 0, 0);
+   rect(815,floor, 60, height - floor, 0, 100, 0, 0);
+
    coin.draw();
    lastcoin.draw();
    platform.draw();
    character.draw();
    
+   // Calculate collisions
+
    platform.getLimits(character.transform, character.crown());
    coin.getLimits(character.transform);
    lastcoin.getLimits(character.transform);
 
+   if(character.transform.x >= (815 + 60 - 10) && character.transform.x <= (940))
+   {
+      if(character.transform.y >= floor)
+      {
+         console.log(floor);
+         limits.setMin(780);
+      }
+   }
 
+
+   // Apply modifications
    if(character.transform.y < limits.min)
    {
       character.addForce(gravity);
