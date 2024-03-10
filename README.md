@@ -17,6 +17,7 @@ Add compression to the files
 - Increase jump distance (done)
 - Code collision with platforms
   - Collision underneath (done)
+  - Use the limits with the gravity (done)
 - Code collission with coins
 - Code pitfalls
 

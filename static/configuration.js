@@ -363,9 +363,12 @@ class Platform extends Object
          fill(255,0,0,100);
          rect(this.transform.x, this.transform.y + 22,  this.width, (height * (7/8)) - this.transform.y - 20);
 
-         if(position.y < (this.transform.y + this.height)) // going down 
+         if(position.y < (this.transform.y + this.height))
          {
             console.log("Do apply gravity");
+
+            rect(this.transform.x, this.transform.y - this.height,  this.width, this.transform.y - (this.transform.y - this.height));
+
             limits.setMin(this.transform.y);
          }
 
@@ -385,7 +388,7 @@ class Platform extends Object
 
          return;
       }
-         
+      // Reset the limits
 
       limits.setMax(0);
       limits.setMin(0);

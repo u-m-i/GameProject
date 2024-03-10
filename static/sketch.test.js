@@ -56,13 +56,13 @@ function draw()
    
    platform.getLimits(character.transform, character.crown());
 
-   if(character.transform.y < floor)
+
+   if(character.transform.y < limits.min)
    {
       character.addForce(gravity);
    }
    else
    {
-      //console.log(character.velocity);
       character.velocity.y = 0;
    }
 }
