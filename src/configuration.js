@@ -32,6 +32,7 @@ let rules =
    recount: function(rules)
    {
       rules.isInvulnerable = false;
+      rules.character.isInvulnerable = false;
 
       if(rules.totalLifes == 0)
       {
@@ -58,6 +59,7 @@ let rules =
       this.totalLifes--;
 
       this.isInvulnerable = true;
+      this.character.isInvulnerable = this.isInvulnerable;
 
       if(this.totalLifes === 0)
          this.delay = 1450;
@@ -181,6 +183,7 @@ let limits =
 
 class Character extends Object
 {
+
    OFFSET = 18;
    SPINE_LENGTH = 34;
 
@@ -204,12 +207,13 @@ class Character extends Object
 // {Boolean}
    isGrounded;
 
+// {Boolean}
+   isInvulnerable;
+
 // {p5.Sound}
    jumpingsound;
 // {Number}
    speed;
-// {p5.Vector}
-   zero;
 
    constructor(x,y, speed, velocityMultiplier)
    {
@@ -226,6 +230,13 @@ class Character extends Object
 
    left()
    {
+      if(this.isInvulnerable)
+      {
+         if(frameCount % 4 == 0)
+         {
+            return;
+         }
+      }
         //Spine
       stroke(0);
       line(this.transform.x, this.transform.y - this.OFFSET,  this.transform.x, (this.transform.y - this.OFFSET) - this.SPINE_LENGTH); 
@@ -253,6 +264,13 @@ class Character extends Object
 
    right()
    {
+      if(this.isInvulnerable)
+      {
+         if(frameCount % 4 == 0)
+         {
+            return;
+         }
+      }
       stroke(0);
       line(this.transform.x, this.transform.y - this.OFFSET,  this.transform.x, (this.transform.y - this.OFFSET) - this.SPINE_LENGTH); 
 
@@ -279,6 +297,13 @@ class Character extends Object
 
    jumping()
    {
+      if(this.isInvulnerable)
+      {
+         if(frameCount % 4 == 0)
+         {
+            return;
+         }
+      }
       stroke(0);
       line(this.transform.x, this.transform.y - this.OFFSET,  this.transform.x, (this.transform.y - this.OFFSET) - this.SPINE_LENGTH); 
 
@@ -307,6 +332,13 @@ class Character extends Object
 
    falling()
    {
+      if(this.isInvulnerable)
+      {
+         if(frameCount % 4 == 0)
+         {
+            return;
+         }
+      }
       stroke(0);
       line(this.transform.x, this.transform.y - this.OFFSET,  this.transform.x, (this.transform.y - this.OFFSET) - this.SPINE_LENGTH); 
 
@@ -335,6 +367,13 @@ class Character extends Object
 
    idle()
    {
+      if(this.isInvulnerable)
+      {
+         if(frameCount % 4 == 0)
+         {
+            return;
+         }
+      }
       //Spine
       stroke(0);
       line(this.transform.x, this.transform.y - this.OFFSET,  this.transform.x, (this.transform.y - this.OFFSET) - this.SPINE_LENGTH); 
@@ -414,8 +453,10 @@ class Character extends Object
 
       //console.log(`${this.transform.x} >= ${limits.maxX} ${this.transform.x >= limits.maxX}`);
 
-      if(this.transform.x >= limits.maxX)
+      if(this.transform.x >= limits.maxX || this.transform.x <= limits.minX)
          return;
+
+      console.log("Unsetting direction");
 
       this.subForce(vector);
    }
@@ -544,13 +585,13 @@ class Platform extends Object
       {
          registerCollission(this);
 
-         fill(255,0,0,100);
-         rect(this.transform.x, this.transform.y + 22,  this.width, (height * (7/8)) - this.transform.y - 20);
+//         fill(255,0,0,100);
+//         rect(this.transform.x, this.transform.y + 22,  this.width, (height * (7/8)) - this.transform.y - 20);
 
          if(position.y < (this.transform.y + this.height))
          {
 
-            rect(this.transform.x, this.transform.y - this.height,  this.width, this.transform.y - (this.transform.y - this.height));
+//            rect(this.transform.x, this.transform.y - this.height,  this.width, this.transform.y - (this.transform.y - this.height));
 
             limits.setMin(this.transform.y);
          }
@@ -559,21 +600,20 @@ class Platform extends Object
          {
             limits.setMax(top - (this.transform.y + this.height));
 
-            stroke(2);
-            fill(0);
-            line(position.x, top, this.transform.x, (this.transform.y + this.height));
+//            stroke(2);
+//            fill(0);
+//            line(position.x, top, this.transform.x, (this.transform.y + this.height));
          }
 
-         return;
       }
+      else
+         unregisterCollission(this);
 
-      unregisterCollission(this);
-
-      if(top < (this.transform.y + this.height) && top > this.transform.y)
-      {
-         fill(0,255,0,100);
-         rect(this.transform.x - 70, this.transform.y, 70, this.height);
-      }
+ //     if(top < (this.transform.y + this.height) && top > this.transform.y)
+ //     {
+ //        fill(0,255,0,100);
+ //        rect(this.transform.x - 70, this.transform.y, 70, this.height);
+ //     }
    }
 }
 
@@ -635,8 +675,35 @@ class Enemy extends Object
 // {Number}
    height = 50;
 
+// {Number}
+   pointA;
+
+// {Number}
+   pointB;
+
+   constructor(x, y, velocityMultiplier)
+   {
+      super(x, y , velocityMultiplier);
+
+      this.pointA = x;
+
+      this.pointB = this.pointA + 180;
+   }
+
+
    draw()
    {
+      if(this.transform.x === this.pointB)
+      {
+         this.addForce(createVector(-1,0));
+      }
+      else if(this.transform.x === this.pointA || this.velocity.x === 0) // If it is static start
+      {
+         this.addForce(createVector(1,0));
+      }
+
+      this.transform.add(this.velocity);
+
       push();
 
       stroke(10);
@@ -667,51 +734,57 @@ class Enemy extends Object
             return; // Avoid hurt the player if it is in a legal position
          }
 
-         //rules.hurt();
 
          if((transform.x >= this.transform.x - (this.width / 2) && transform.x <= this.transform.x - (this.width / 2) + 2) && transform.y > this.transform.y - this.height)
          {
-            console.log("Colliding with the left of the enemy");
+            //console.log("Colliding with the left of the enemy");
 
+            rules.hurt();
             limits.setMaxX(this.transform.x - (this.width / 2));
             return;
          }
 
          if((transform.x <= this.transform.x + (this.width / 2) && transform.x >= this.transform.x + (this.width/2) - 2) && transform.y > this.transform.y - this.height)
          {
-            limits.setMinX(this.transform.x + (this.width / 2) + 5);
+            rules.hurt();
+            limits.setMinX(this.transform.x + (this.width / 2));
             return;
          }
 
-         return;
 
       }
-
-      unregisterCollission(this);
+      else
+         unregisterCollission(this);
    }
 }
 
-let lastColl;
+let lastColl = undefined;
+
+function registerCollission( current )
+{
+   if(!lastColl)
+   {
+      lastColl = current;
+      return;
+   }
+
+   // Override if the current is higher than the last
+   if(current.transform.y > lastColl.transform.y)
+      lastColl = current;
+}
 
 function unregisterCollission( objct )
 {
-   if(!lastColl)
+   if(lastColl !== objct)
       return;
 
-   console.log(`Unregistering the collision of the:`);
-   console.log(lastColl);
+//   console.log(`Unregistering the collision of the:`);
+//   console.log(lastColl);
 
-   if(lastColl === objct)
-      limits.reset();
+   limits.reset();
+   lastColl = undefined;
 }
 
-function registerCollission( objct )
-{
-   if(lastColl === objct)
-      return;
-
-   lastColl = objct;
-}
 
 class WinBarrier extends Object
 {
