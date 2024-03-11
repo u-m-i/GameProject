@@ -22,7 +22,7 @@ Add compression to the files
 - Code pitfalls (done)
 - Code enemies
 - Code game logic - Rules, gameover, hearts -
-- Add sound effects
+- Add sound effects (done)
 
 - Create a creator function to instatiate multiple props depending in a number given
 

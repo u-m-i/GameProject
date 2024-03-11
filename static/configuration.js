@@ -20,6 +20,56 @@ const BACKWARD = [-1,0];
 const UPWARD =  [0,-1];
 const DOWNWARD =  [0,1];
 
+let rules =
+{
+   isInmortal: false,
+   hasFallen: false,
+   hasDied: false,
+   hasTimedout: false,
+
+   totalLifes: 3,
+
+   hurt: function()
+   {
+      if(this.isInmortal)
+         return;
+
+      console.log("The player has been hurted");
+
+      // Finish the game
+      if(this.totalLifes == 0)
+      {
+         this.hasDied = true;
+         return;
+      }
+
+      this.totalLifes--;
+
+      if(this.hasFallen)
+         this.respawn();
+   },
+
+   endGame: function()
+   {
+      fill(25);
+      textSize(45);
+
+      textAlign(CENTER);
+
+      text("Game over!",width / 2 , height / 2);
+
+      text("Press any key to restart",width /2, (height / 2) + 55);
+
+      this.totalLifes = 3;
+   },
+
+   respawn: function()
+   {
+      character.transform.x = 0;
+      character.transform.y = 0;
+   }
+};
+
 
 let limits =
 {
@@ -27,6 +77,9 @@ let limits =
    {
       this.minDefault = min;
       this.maxDefault = max;
+
+      this.min = this.minDefault;
+      this.max = this.maxDefault;
    },
 
    setMax : function(max)
@@ -308,7 +361,6 @@ class Character extends Object
       {
          let result = this.coroutine.next().value;
 
-
          if(!result)
          {
             this.coroutine = undefined;
@@ -352,7 +404,6 @@ class Coin extends Object
 
    draw()
    {
-
       if(this.state == "picked")
          return;
 
@@ -433,6 +484,49 @@ class Platform extends Object
    }
 }
 
+class Pitfall extends Object 
+{
+// {Number}
+   height = height - this.transform.y;
+// {Number}
+   width = 60;
+// {Number}
+   roundness = 100;
+
+   draw()
+   {
+      noStroke();
+      fill(100,155,255);
+      rect(this.transform.x + 5, this.transform.y, 140, this.height);
+
+      fill(0,155,83);
+      stroke(30);
+      strokeWeight(3);
+
+      rect((this.transform.x + 125), this.transform.y, this.width, this.transform.y, this.roundness, 0, 0, 0);
+
+      rect(this.transform.x, this.transform.y, this.width, this.height, 0, this.roundness, 0, 0);
+   }
+
+   getLimits(transform)
+   {
+      if(transform.x >= (815 + 60 - 10) && transform.x <= this.transform.x + 125)
+      {
+         registerColl(this);
+
+         if(transform.y >= this.transform.y)
+         {
+            rules.hurt();
+            limits.setMin(780);
+         }
+
+         return;
+      }
+
+      unregisterColl(this);
+   }
+}
+
 class Enemy extends Object
 {
 // {Number}
@@ -463,6 +557,9 @@ class Enemy extends Object
          && transform.x < this.transform.x + (this.width / 2))
       {
          registerColl(this);
+
+         rules.hasFalled = true;
+         rules.hurt();
 
          if(transform.y < this.transform.y - this.height)
          {
@@ -500,4 +597,4 @@ function registerColl( objct )
 }
 
 
-export {Platform, Coin, Character, Enemy, limits, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};
+export {Pitfall, Platform, Coin, Character, Enemy, limits, rules, LEFT_KEY, RIGHT_KEY, JUMP_KEY, FORWARD, BACKWARD, UPWARD, DOWNWARD};

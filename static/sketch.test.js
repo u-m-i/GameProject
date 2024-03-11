@@ -1,15 +1,13 @@
-import {Platform, Character, Coin, limits, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD, BACKWARD, FORWARD, Enemy} from './configuration.js';
+import {Platform, Pitfall, Character, Coin, Enemy, limits, rules, JUMP_KEY, LEFT_KEY, RIGHT_KEY, UPWARD, BACKWARD, FORWARD} from './configuration.js';
 
 let directionMap = new Map();
 let character = {};
 let gravity = {};
 let floor = {};
 let coin, platform;
+let pitfall;
 let enemy;
-
 let jumpeffect;
-
-let lifesCount = 3;
 
 /// ======== Concrete methods for p5  ========
 
@@ -23,6 +21,7 @@ function preload()
 
 function setup()
 {
+
    createCanvas(1200, 680);
 
    directionMap.set(LEFT_KEY, createVector(...BACKWARD));
@@ -33,13 +32,15 @@ function setup()
 
    gravity = createVector(0, (1/14));
 
-   character = new Character(250,400, 8, 4);
+   character = new Character(308,400, 8, 4);
 
    character.jumpingsound = jumpeffect;
 
    coin = new Coin(450, floor - 10, 2, 2);
 
    platform = new Platform(480, floor - 92, 2, 2);
+
+   pitfall = new Pitfall(815, floor, 2, 2);
 
    enemy = new Enemy(230, floor, 2, 2);
 
@@ -51,6 +52,14 @@ function setup()
 
 function draw()
 {
+
+   if(rules.hasDied)
+   {
+      console.log("The player has died!");
+      rules.endGame();
+      return;
+   }
+
    clear();
    background(100,155,255);
 
@@ -62,18 +71,8 @@ function draw()
 	fill(0,155,83);
 	rect(0, floor, width, height - floor);
 
-   // Pitfall
 
-   noStroke();
-   fill(100,155,255);
-   rect(820, floor, 140, height - floor);
-
-	fill(0,155,83);
-   stroke(30);
-	strokeWeight(3);
-   rect(940,floor, 60, height - floor, 100, 0, 0, 0);
-   rect(815,floor, 60, height - floor, 0, 100, 0, 0);
-
+   pitfall.draw();
    coin.draw();
    platform.draw();
    character.draw();
@@ -84,17 +83,8 @@ function draw()
    platform.getLimits(character.transform, character.crown());
    coin.getLimits(character.transform);
 
-   // Enemy
    enemy.getLimits(character.transform);
-
-   // Pitfall
-   if(character.transform.x >= (815 + 60 - 10) && character.transform.x <= (940))
-   {
-      if(character.transform.y >= floor)
-      {
-         limits.setMin(780);
-      }
-   }
+   pitfall.getLimits(character.transform);
 
 
    if(character.transform.y < limits.min)
