@@ -23,9 +23,10 @@ Add compression to the files
 - Code enemies
 - Code game logic
   - hearts or life count (done)
-  - Invulnerable mechanic
+  - Invulnerable mechanic (done)
   - Game over screen (done)
-  - Win screen
+  - Win screen (done)
+- Solve all the bugs
 
 - Add sound effects (done)
 - Add scenery
