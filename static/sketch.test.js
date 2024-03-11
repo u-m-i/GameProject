@@ -36,6 +36,8 @@ function setup()
 
    character.jumpingsound = jumpeffect;
 
+   rules.character = character;
+
    coin = new Coin(450, floor - 10, 2, 2);
 
    platform = new Platform(480, floor - 92, 2, 2);
@@ -89,12 +91,14 @@ function draw()
 
    if(character.transform.y < limits.min)
    {
+      character.isGrounded = false;
       character.addForce(gravity);
    }
    else
    {
       character.velocity.y = 0;
       character.transform.y = limits.min;
+      character.isGrounded = true;
    }
 }
 

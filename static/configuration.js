@@ -22,31 +22,59 @@ const DOWNWARD =  [0,1];
 
 let rules =
 {
-   isInmortal: false,
+   isInvulnerable: false,
    hasFallen: false,
    hasDied: false,
-   hasTimedout: false,
 
+   // {Character}
+   character : {},
+
+   // {p5.Vector}
+   respawnPoint : {},
+   //hasTimedout: false,
+
+   delay : 2340,
    totalLifes: 3,
+
+
+   recount: function(rules)
+   {
+      console.log("The recount is being called");
+
+      rules.isInvulnerable = false;
+
+      if(rules.totalLifes == 0)
+      {
+         rules.hasDied = true;
+         return; // Avoid respawning in case has fallen
+      }
+
+      if(rules.hasFallen)
+         rules.respawn();
+   },
 
    hurt: function()
    {
-      if(this.isInmortal)
+      if(this.hasFallen && this.isInvulnerable)
+         this.delay = 1600;
+
+      if(this.isInvulnerable)
          return;
 
       console.log("The player has been hurted");
 
       // Finish the game
-      if(this.totalLifes == 0)
-      {
-         this.hasDied = true;
-         return;
-      }
 
       this.totalLifes--;
 
-      if(this.hasFallen)
-         this.respawn();
+      this.isInvulnerable = true;
+
+      if(this.totalLifes === 0)
+      {
+         this.delay = 1450;
+      }
+
+      setTimeout(this.recount,this.delay,this);
    },
 
    endGame: function()
@@ -65,9 +93,18 @@ let rules =
 
    respawn: function()
    {
-      character.transform.x = 0;
-      character.transform.y = 0;
-   }
+      this.hasFallen = false;
+
+      limits.reset();
+
+      this.character.velocity.y = 0;
+      this.character.velocity.x = 0;
+
+      this.character.transform.x = this.respawnPoint.x;
+      this.character.transform.y = this.respawnPoint.y;
+
+      this.character.mustBlock = false;
+   },
 };
 
 
@@ -102,8 +139,11 @@ let limits =
 class Object
 {
    transform; // {p5.Vector}
+
    velocity; // {p5.Vector}
+
    multiplier; // {Number}
+
    acceleration; // {Number}
 
    constructor(x, y, acceleration, velocityMultiplier)
@@ -161,6 +201,13 @@ class Character extends Object
 
 // {String}
    state;
+
+// {Boolean}
+// Use to block the input in certain moments
+   mustBlock;
+
+// {Boolean}
+   isGrounded;
 
 // {p5.Sound}
    jumpingsound;
@@ -276,10 +323,10 @@ class Character extends Object
       circle(this.transform.x, this.transform.y - SPINE_LENGTH - HEAD_DIAMETER - 4, HEAD_DIAMETER);
 
       //Right arm
-      line(this.transform.x, (this.transform.y - OFFSET) - CHEST_LENGTH,  this.transform.x + HAND_LENGTH, (this.transform.y - OFFSET) - CHEST_LENGTH - delta); 
+      line(this.transform.x, (this.transform.y - OFFSET) - CHEST_LENGTH,  this.transform.x + HAND_LENGTH, (this.transform.y - OFFSET) - CHEST_LENGTH - DELTA); 
 
       //Left arm
-      line(this.transform.x, (this.transform.y - OFFSET) - CHEST_LENGTH,  this.transform.x - HAND_LENGTH, (this.transform.y - OFFSET) - CHEST_LENGTH - delta); 
+      line(this.transform.x, (this.transform.y - OFFSET) - CHEST_LENGTH,  this.transform.x - HAND_LENGTH, (this.transform.y - OFFSET) - CHEST_LENGTH - DELTA); 
 
       //Shadow
       fill(134);
@@ -321,9 +368,10 @@ class Character extends Object
 
    setDirection(vector)
    {
-      console.log(this.velocity);
+      if(this.mustBlock)
+         return;
 
-      if(vector.y < 0 && (this.state == "jumping" || this.state == "falling"))
+      if(vector.y < 0 && !this.isGrounded)
          return;
 
       if(vector.y < 0)
@@ -339,6 +387,9 @@ class Character extends Object
 
    unsetDirection(vector)
    {
+      if(this.mustBlock)
+         return;
+
       if(vector.y < 0)
          return;
 
@@ -369,7 +420,7 @@ class Character extends Object
 
       this.transform.add(this.velocity); // Adds force to the body
 
-      point(this.transform.x, this.transform.y);
+      //point(this.transform.x, this.transform.y);
 
       if(this.velocity.x < 0)
       {
@@ -383,10 +434,16 @@ class Character extends Object
       {
          this.state = "idle";
       }
-      else if(this.velocity.y != 0 )
+      else if(this.velocity.y < 0 )
       {
          this.state = "jumping";
       }
+      else if(this.velocity.y > 0)
+      {
+         this.state = "falling";
+      }
+
+      console.log(this.state);
 
       this[this.state](); // Draw the current state
    }
@@ -450,17 +507,16 @@ class Platform extends Object
 
          if(position.y < (this.transform.y + this.height))
          {
-            console.log("Do apply gravity");
 
             rect(this.transform.x, this.transform.y - this.height,  this.width, this.transform.y - (this.transform.y - this.height));
 
             limits.setMin(this.transform.y);
          }
 
-         if(position.y >= this.transform.y && top < this.transform.y)
-         {
-            console.log("Do not apply gravity");
-         }
+//         if(position.y >= this.transform.y && top < this.transform.y)
+//         {
+//            console.log("Do not apply gravity");
+//         }
 
          if(top > this.transform.y + this.height)
          {
@@ -514,8 +570,15 @@ class Pitfall extends Object
       {
          registerColl(this);
 
+
          if(transform.y >= this.transform.y)
          {
+            rules.hasFallen = true;
+            rules.respawnPoint = this.transform;
+
+            rules.character.mustBlock = true;
+            rules.character.velocity.x = 0;
+
             rules.hurt();
             limits.setMin(780);
          }
@@ -558,17 +621,14 @@ class Enemy extends Object
       {
          registerColl(this);
 
-         rules.hasFalled = true;
-         rules.hurt();
-
          if(transform.y < this.transform.y - this.height)
          {
-            //console.log("Collision with an enemy -1 live!");
             limits.setMin(this.transform.y - this.height);
-            //console.log(`The limit.min -> ${limits.min}`);
+
+            return; // Avoid hurt the player if it is in a legal position
          }
 
-         return;
+         rules.hurt();
       }
 
       unregisterColl(this);

@@ -21,10 +21,15 @@ Add compression to the files
 - Code collission with coins (done)
 - Code pitfalls (done)
 - Code enemies
-- Code game logic - Rules, gameover, hearts -
-- Add sound effects (done)
+- Code game logic
+  - hearts or life count (done)
+  - Invulnerable mechanic
+  - Game over screen (done)
+  - Win screen
 
-- Create a creator function to instatiate multiple props depending in a number given
+- Add sound effects (done)
+- Add scenery
+- Slide world
 
 ## Results
 
